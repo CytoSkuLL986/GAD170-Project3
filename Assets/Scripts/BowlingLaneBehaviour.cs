@@ -18,6 +18,7 @@ public class BowlingLaneBehaviour : MonoBehaviour
     public Transform defaultBallLocation;
     //TODO; we need a way of tracking the pins that are used for scoring and so we can clean them up
 
+    List<GameObject> pins = new List<GameObject>();
 
     [ContextMenu("InitialiseRound")]
     public void InitialiseRound()
@@ -29,6 +30,15 @@ public class BowlingLaneBehaviour : MonoBehaviour
             var newPin = Instantiate(pinPrefab, pinLoc.position, pinLoc.rotation);
         }
         */
+
+
+        foreach(var pinloc in pinSpawnLocations)
+        {
+
+            var newpin = Instantiate(pinPrefab, pinloc.position, pinloc.rotation);
+            pins.Add(newpin);
+        }
+
     }
 
     public void BallReachedEnd()
@@ -36,16 +46,49 @@ public class BowlingLaneBehaviour : MonoBehaviour
         //TODO; this needs to return the ball to the ball feed so the player could bowl again or at least clean ups
     }
 
+    int score;
+
     [ContextMenu("TalleyScore")]
     public void TalleyScore()
     {
-      //TODO; determine score and get that information out to a checklist item, either via event or directly
+        //TODO; determine score and get that information out to a checklist item, either via event or directly
+
+        score = 0;
+
+        for (int i = 0; i < pins.Count; i++)
+        {
+            float angle = Vector3.Dot(Vector3.up, pins[i].transform.up);
+
+            if (angle <= 0.9f)
+            {
+                score++;
+            }
+        }
+
+        print(score);
+       
     }
+
+
 
     [ContextMenu("ResetRack")]
     public void ResetRack()
     {
         //TODO; clean up all objects created by the bowling lane, preparing for a new round of bowling to occur
+    
+       for (int i = 0; i < pins.Count; i++)
+       {
+            pins[i].transform.position = pinSpawnLocations[i].transform.position;
+            pins[i].transform.rotation = pinSpawnLocations[i].transform.rotation;
+       }
+
+        bowlingBall.transform.position = defaultBallLocation.transform.position;
+        bowlingBall.GetComponent<Rigidbody>().velocity = Vector3.zero;
+        bowlingBall.GetComponent<Rigidbody>().angularVelocity = Vector3.zero;
+    
+    
+    
+    
     }
 
     protected void Update()
